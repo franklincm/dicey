@@ -1,4 +1,4 @@
-from lark import Lark
+from lark import Lark, exceptions
 import random
 
 roll_grammar = '''
@@ -86,5 +86,9 @@ def _process_die(t):
 
 if __name__ == '__main__':
     parser = Lark(roll_grammar, parser='lalr')
-    parse_tree = parser.parse('10d20 + 1 + 2d4 - 6')
-    process_tree(parse_tree, True)
+    while(True):
+        try:
+            parse_tree = parser.parse(input('expression: '))
+            process_tree(parse_tree, input('verbose? ').lower() == 'y')
+        except exceptions.UnexpectedCharacters:
+            print('invalid expression')
