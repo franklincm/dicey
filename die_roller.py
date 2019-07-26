@@ -1,4 +1,5 @@
 from lark import Lark
+from die_roll_result import DieRollResult
 import random
 
 roll_grammar = '''
@@ -27,29 +28,25 @@ class DieRoller:
     def __init__(self):
         self.parser = Lark(roll_grammar, parser='lalr')
         self.grammar = roll_grammar
-        self.roll_expr = ''
+
+        self.input_expr = ''
         self.die_expr = ''
+        self.roll_expr = ''
         self.mod_expr = ''
         self.total = 0
 
-        self.prev_roll_expr = ''
-        self.prev_roll_verbose = ''
+        self.result = DieRollResult()
 
-    def eval_string(self, expr):
-        self.roll_expr = expr
-        self.prev_roll_expr = expr
+    def roll(self, expr):
+        self.input_expr = expr
         self.parse_tree = self.parser.parse(expr)
 
-        (self.die_expr, self.roll_expr,
-         self.mod_expr, self.total) = self.process_tree(
+        (self.result.die_expr, self.result.roll_expr,
+         self.result.mod_expr, self.result.total) = self.process_tree(
              self.parse_tree)
 
     def reroll(self):
-        self.parser.parse(self.prev_roll_expr)
-
-        (self.die_expr, self.roll_expr,
-         self.mod_expr, self.total) = self.process_tree(
-             self.parse_tree)
+        self.roll(self.input_expr)
 
     def process_tree(self, t):
 
@@ -111,14 +108,7 @@ class DieRoller:
 
 if __name__ == '__main__':
     d = DieRoller()
-    d.eval_string('1d4 + 2d8 - 1')
-    print(d.roll_expr)
-    print(d.die_expr)
-    print(d.mod_expr)
-    print(d.total)
-    print()
-    d.reroll()
-    print(d.roll_expr)
-    print(d.die_expr)
-    print(d.mod_expr)
-    print(d.total)
+    d.roll('1d4 + 2d8 - 1')
+    print(d.result.result())
+    print(d.result.result_v())
+    print(d.result.result_vv())
