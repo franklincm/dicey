@@ -1,4 +1,4 @@
-from lark import Lark, exceptions
+from lark import Lark
 import random
 
 roll_grammar = '''
@@ -22,73 +22,103 @@ roll_grammar = '''
 '''
 
 
-def process_tree(t, verbose=False):
+class DieRoller:
 
-    positive = True
-    total = 0
-    die_expr = ''
-    roll_expr = ''
-    mod_expr = ''
+    def __init__(self):
+        self.parser = Lark(roll_grammar, parser='lalr')
+        self.grammar = roll_grammar
+        self.roll_expr = ''
+        self.die_expr = ''
+        self.mod_expr = ''
+        self.total = 0
 
-    for node in parse_tree.find_data('token'):
-        ntype = node.children[0].data
+        self.prev_roll_expr = ''
+        self.prev_roll_verbose = ''
 
-        if ntype == 'die':
-            die, roll, result = _process_die(node.children[0])
-            roll_expr += '{0}'.format(roll)
-            die_expr += '{0}'.format(die)
-            total += result
-        else:
-            ttype = node.children[1].data
-            positive = node.children[0].children[0] == '+'
+    def eval_string(self, expr):
+        self.roll_expr = expr
+        self.prev_roll_expr = expr
+        self.parse_tree = self.parser.parse(expr)
 
-            if ttype == 'mod':
-                value = int(node.children[1].children[0])
-                if positive:
-                    mod_expr += ' + {0}'.format(value)
-                    total += value
-                else:
-                    mod_expr += ' - {0}'.format(value)
-                    total -= value
+        (self.die_expr, self.roll_expr,
+         self.mod_expr, self.total) = self.process_tree(
+             self.parse_tree)
+
+    def reroll(self):
+        self.parser.parse(self.prev_roll_expr)
+
+        (self.die_expr, self.roll_expr,
+         self.mod_expr, self.total) = self.process_tree(
+             self.parse_tree)
+
+    def process_tree(self, t):
+
+        positive = True
+        total = 0
+        die_expr = ''
+        roll_expr = ''
+        mod_expr = ''
+
+        for node in t.find_data('token'):
+            ntype = node.children[0].data
+
+            if ntype == 'die':
+                die, roll, result = self._process_die(node.children[0])
+                roll_expr += '{0}'.format(roll)
+                die_expr += '{0}'.format(die)
+                total += result
             else:
-                die, roll, result = _process_die(node.children[1])
-                if positive:
-                    roll_expr += ' + {0}'.format(roll)
-                    die_expr += ' + {0}'.format(die)
-                    total += result
+                ttype = node.children[1].data
+                positive = node.children[0].children[0] == '+'
+
+                if ttype == 'mod':
+                    value = int(node.children[1].children[0])
+                    if positive:
+                        mod_expr += ' + {0}'.format(value)
+                        total += value
+                    else:
+                        mod_expr += ' - {0}'.format(value)
+                        total -= value
                 else:
-                    roll_expr += ' - ({0})'.format(roll)
-                    die_expr += ' - {0}'.format(die)
-                    total -= result
+                    die, roll, result = self._process_die(node.children[1])
+                    if positive:
+                        roll_expr += ' + {0}'.format(roll)
+                        die_expr += ' + {0}'.format(die)
+                        total += result
+                    else:
+                        roll_expr += ' - ({0})'.format(roll)
+                        die_expr += ' - {0}'.format(die)
+                        total -= result
 
-    if verbose:
-        print("%s = %s%s = %s" % (die_expr, roll_expr, mod_expr, total))
-    else:
-        print("%s%s = %s" % (die_expr, mod_expr, total))
+        return (die_expr, roll_expr, mod_expr, total)
 
+    def _process_die(self, t):
+        numdie = int(t.children[0].children[0])
+        maxdie = int(t.children[1].children[0])
 
-def _process_die(t):
-    numdie = int(t.children[0].children[0])
-    maxdie = int(t.children[1].children[0])
+        die_expr = '{0}d{1}'.format(numdie, maxdie)
+        roll_expr = ''
+        total = 0
+        for die in range(numdie):
+            roll = random.randint(1, maxdie)
+            roll_expr += '({0}) '.format(roll)
+            total += roll
+        roll_expr = roll_expr.replace(') (', ') + (')
+        roll_expr = roll_expr[:-1]
 
-    die_expr = '{0}d{1}'.format(numdie, maxdie)
-    roll_expr = ''
-    total = 0
-    for die in range(numdie):
-        roll = random.randint(1, maxdie)
-        roll_expr += '({0}) '.format(roll)
-        total += roll
-    roll_expr = roll_expr.replace(') (', ') + (')
-    roll_expr = roll_expr[:-1]
-
-    return (die_expr, roll_expr, total)
+        return (die_expr, roll_expr, total)
 
 
 if __name__ == '__main__':
-    parser = Lark(roll_grammar, parser='lalr')
-    while(True):
-        try:
-            parse_tree = parser.parse(input('expression: '))
-            process_tree(parse_tree, input('verbose? ').lower() == 'y')
-        except exceptions.UnexpectedCharacters:
-            print('invalid expression')
+    d = DieRoller()
+    d.eval_string('1d4 + 2d8 - 1')
+    print(d.roll_expr)
+    print(d.die_expr)
+    print(d.mod_expr)
+    print(d.total)
+    print()
+    d.reroll()
+    print(d.roll_expr)
+    print(d.die_expr)
+    print(d.mod_expr)
+    print(d.total)
