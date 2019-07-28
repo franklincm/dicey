@@ -34,9 +34,10 @@ class DieRollResult:
         '''
         print very verbose result -> '1d20 + 2d4 + 1 = 10 + 3 + 2 + 1 = 16'
         '''
-        return "{0}{1} = {2} = {3}".format(
+        return "{0}{1} = {2}{3} = {4}".format(
             self.die_expr,
             self.mod_expr,
             self.roll_expr,
+            self.mod_expr,
             self.total
         )
