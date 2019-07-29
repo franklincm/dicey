@@ -1,6 +1,7 @@
-from lark import Lark
+from lark import Lark, exceptions
 from die_roll_result import DieRollResult
 import random
+import sys
 
 roll_grammar = """
     start: expr
@@ -109,8 +110,23 @@ class DieRoller:
 
 
 if __name__ == "__main__":
+    print("ctrl-d to exit")
     d = DieRoller()
-    d.roll("1d4 + 2d8 - 1")
-    print(d.result.result())
-    print(d.result.result_v())
-    print(d.result.result_vv())
+    while True:
+        try:
+            expr = input("roll: ")
+            d.roll(expr)
+            print(d.result.result())
+            print(d.result.result_v())
+            print(d.result.result_vv())
+        except exceptions.UnexpectedCharacters:
+            print("invalid")
+        except exceptions.UnexpectedToken:
+            continue
+        except KeyboardInterrupt:
+            print()
+            continue
+        except EOFError:
+            print()
+            print("exiting")
+            sys.exit(0)
