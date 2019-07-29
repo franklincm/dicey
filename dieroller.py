@@ -1,5 +1,5 @@
 from lark import Lark, exceptions
-from die_roll_result import DieRollResult
+from result import DieRollResult
 import random
 import sys
 
