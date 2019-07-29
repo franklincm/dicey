@@ -10,6 +10,7 @@ lark-parser = "*"
 pre-commit = "*"
 flake8 = "*"
 autopep8 = "*"
+black = "*"
 
 [requires]
 python_version = "3.7"
