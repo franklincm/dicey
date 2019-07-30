@@ -42,7 +42,7 @@ def loop():
             sys.exit(0)
 
 
-if __name__ == "__main__":
+def main():
     from docopt import docopt
 
     arguments = docopt(__doc__)
@@ -61,3 +61,7 @@ if __name__ == "__main__":
 
     else:
         loop()
+
+
+if __name__ == "__main__":
+    main()
