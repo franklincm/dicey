@@ -1,4 +1,5 @@
 # Dice Strings
+version 1.0
 
 A python package for evaluating dice rolls.
 
