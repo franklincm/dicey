@@ -13,7 +13,7 @@ setuptools.setup(
     url="https://github.com/gnullbyte/dicey",
     packages=setuptools.find_packages(exclude=["contrib", "docs", "tests*"]),
     install_requires=["lark-parser", "docopt"],
-    entry_points={"console_scripts": ["dicey=dicey:main"]},
+    entry_points={"console_scripts": ["dicey=dicey.__main__:main"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
