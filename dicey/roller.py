@@ -1,7 +1,10 @@
-from lark import Lark, exceptions
-from result import DieRollResult
+from lark import Lark
 import random
-import sys
+
+try:
+    from dicey import result
+except ImportError:
+    import result
 
 roll_grammar = """
     start: expr
@@ -35,7 +38,7 @@ class DieRoller:
         self.mod_expr = ""
         self.total = 0
 
-        self.result = DieRollResult()
+        self.result = result.DieRollResult()
 
     def roll(self, expr):
         self.input_expr = expr
@@ -107,26 +110,3 @@ class DieRoller:
         roll_expr = roll_expr[:-1]
 
         return (die_expr, roll_expr, total)
-
-
-if __name__ == "__main__":
-    print("ctrl-d to exit")
-    d = DieRoller()
-    while True:
-        try:
-            expr = input("roll: ")
-            d.roll(expr)
-            print(d.result.result())
-            print(d.result.result_v())
-            print(d.result.result_vv())
-        except exceptions.UnexpectedCharacters:
-            print("invalid")
-        except exceptions.UnexpectedToken:
-            continue
-        except KeyboardInterrupt:
-            print()
-            continue
-        except EOFError:
-            print()
-            print("exiting")
-            sys.exit(0)

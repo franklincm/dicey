@@ -7,3 +7,4 @@ repos:
     rev: v1.2.3
     hooks:
     - id: flake8
+      exclude: '__init__.py'
