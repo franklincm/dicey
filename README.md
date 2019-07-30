@@ -19,23 +19,33 @@ Results can be displayed a few different ways:
 pip install dicey
 
 ## Usage
-```python
-python -m dicey
+### Command Line
+```
+Usage:
+  dicey
+  dicey [-v | -vv] <expression>
+
+Options:
+  -h --help  show this screen.
+  -v         print expression with total
+  -vv        print expression, intermediate results, and total
 ```
 
+### As a python package
 ```python
 from dicey import roller
 
 d = roller.DieRoller()
-result = d.roll('1d20 + 1d4 + 2')
+d.roll('1d20 + 1d4 + 2')
 
-print(result.result())
-print(result.result_v())
-print(result.result_vv())
+result = d.result
+str(result)        # >>> "13"
+str(result.v())    # >>> "1d20 + 1d4 + 2 = 13"
+print(result.vv()) # >>> "1d20 + 1d4 + 2 = (7) + (4) + 2 = 13
 
 d.reroll()
 result = d.result
-print(result.result())
-print(result.result_v())
-print(result.result_vv())
+print(result)      # >>> "23"
+print(result.v())  # >>> "1d20 + 1d4 + 2 = 23"
+print(result.vv()) # >>> "1d20 + 1d4 + 2 = (19) + (2) = 23"
 ```
