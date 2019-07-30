@@ -8,9 +8,9 @@ while True:
     try:
         expr = input("roll: ")
         d.roll(expr)
-        print(d.result.result())
-        print(d.result.result_v())
-        print(d.result.result_vv())
+        print(d.result)
+        print(d.result.v())
+        print(d.result.vv())
     except exceptions.UnexpectedCharacters:
         print("invalid expression")
     except exceptions.UnexpectedToken:
