@@ -1,5 +1,5 @@
-# Dice Strings
-version 1.0
+# Dicey
+version 1.0.1
 
 A python package for evaluating dice rolls.
 
