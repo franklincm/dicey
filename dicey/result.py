@@ -11,23 +11,23 @@ class DieRollResult:
             self.mod_expr = self.mod_expr[3:]
 
     def __str__(self):
-        return self.result_v()
+        return self._total()
 
-    def result(self):
+    def _total(self):
         """
         print result -> int
         """
         self._check_mod()
         return "{0}".format(self.total)
 
-    def result_v(self):
+    def v(self):
         """
         print verbose result -> '1d20 + 2d4 + 1 = 16'
         """
         self._check_mod()
         return "{0}{1} = {2}".format(self.die_expr, self.mod_expr, self.total)
 
-    def result_vv(self):
+    def vv(self):
         """
         print very verbose result -> '1d20 + 2d4 + 1 = 10 + 3 + 2 + 1 = 16'
         """
