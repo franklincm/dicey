@@ -10,6 +10,7 @@ pytest = "*"
 
 [packages]
 lark-parser = "*"
+docopt = "*"
 
 [requires]
 python_version = "3.7"
