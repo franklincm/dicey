@@ -1,5 +1,9 @@
 from lark import exceptions
-from . import roller
+
+try:
+    from . import roller
+except ImportError:
+    import roller
 import sys
 
 d = roller.DieRoller()
