@@ -70,6 +70,14 @@ class DieRoller:
                 roll_expr += "{0}".format(roll)
                 die_expr += "{0}".format(die)
                 total += result
+            elif ntype == "mod":
+                value = int(node.children[0].children[0])
+                if value < 0:
+                    mod_expr += " - {0}".format(value)
+                    total -= value
+                else:
+                    mod_expr += " + {0}".format(value)
+                    total += value
             else:
                 ttype = node.children[1].data
                 positive = node.children[0].children[0] == "+"
@@ -85,11 +93,15 @@ class DieRoller:
                 else:
                     die, roll, result = self._process_die(node.children[1])
                     if positive:
-                        roll_expr += " + {0}".format(roll)
-                        die_expr += " + {0}".format(die)
+                        if die_expr == "":
+                            roll_expr += "{0}".format(roll)
+                            die_expr += "{0}".format(die)
+                        else:
+                            roll_expr += " + {0}".format(roll)
+                            die_expr += " + {0}".format(die)
                         total += result
                     else:
-                        roll_expr += " - ({0})".format(roll)
+                        roll_expr += " - [{0}]".format(roll)
                         die_expr += " - {0}".format(die)
                         total -= result
 
