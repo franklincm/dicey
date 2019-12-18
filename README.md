@@ -1,5 +1,5 @@
 # Dicey
-version 2.0.0
+version 2.0.1
 
 A python package for evaluating dice rolls.
 
