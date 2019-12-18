@@ -1,48 +1,8 @@
-import lark
 import random
 import sys
 from queue import LifoQueue
 
-grammar = """
-start: expr+ (op expr)* meta* repeat?
-
-expr: tok
-     |l tok r
-     |l tok expr_tail r
-
-expr_tail: op tok
-          |op tok expr_tail
-          |op l tok r
-          |op l tok expr_tail r
-
-tok: die|num
-die: INT "d" INT         -> die
-num: INT                 -> num
-op: ADDOP|MULOP          -> op
-l: LPAREN                -> lparen
-r: RPAREN                -> rparen
-
-meta: ADDOP SPEC         -> meta
-repeat: "{" INT "}"      -> repeat
-
-
-LPAREN: "("
-RPAREN: ")"
-ADDOP: "+"|"-"
-MULOP: "*"|"/"
-SPEC: "min"|"max"
-
-%import common.INT
-%import common.WS
-%ignore WS
-"""
-
-text = (
-    "(1 + (2d4 + (1 + (3d6 + (12d8))))) + (2d4 + 1d6) + (1d8) - 2d4 - min {2}"
-)
-# text = "1 + (2d4 + 3d6) * 2 - min {2}"
-# text = "4d6 - min"
-# print(tree.pretty())
+import lark
 
 
 class DieTransformer(lark.Transformer):
@@ -143,7 +103,7 @@ class DieTransformer(lark.Transformer):
             if roll < self.min:
                 self.min = roll
 
-        self.intermediate_expr += " {} ".format(total)
+        self.intermediate_expr += "{}".format(total)
         self.value.put(total)
 
     def meta(self, args):
@@ -164,44 +124,3 @@ class DieTransformer(lark.Transformer):
     def repeat(self, args):
         self.repeats = int(args[0])
         self.string += " {{{0}}}".format(self.repeats)
-
-
-class DieParser:
-    def __init__(self):
-        self.last_exp = ""
-        self.intermediate_expr = ""
-        self.results = []
-        self.transformer = DieTransformer()
-        self.parser = lark.Lark(
-            grammar,
-            parser="lalr",
-            transformer=self.transformer,
-            propagate_positions=False,
-        )
-
-    def parse(self, text):
-        self.parser.parse(text)
-        self.transformer._eval()
-        self.last_exp = self.transformer.string
-        self.intermediate_expr = self.transformer.intermediate_expr
-        self.results.append(self.transformer.value.get())
-
-        for i in range(self.transformer.repeats - 1):
-            self.transformer.__init__()
-            self.parser.parse(text)
-            self.intermediate_expr += "\n{}".format(
-                self.transformer.intermediate_expr
-            )
-            self.results.append(self.transformer.value.get())
-
-    def __str__(self):
-        s = ""
-        s += "{} = ".format(self.last_exp)
-        s += "{} = ".format(self.intermediate_expr)
-        s += str(self.results[0])
-        return s
-
-
-d = DieParser()
-d.parse(text)
-print(d)
