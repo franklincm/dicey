@@ -39,12 +39,18 @@ class DieParser:
         s = ""
         if len(self.results) > 1:
             s += "{} = ".format(self.last_exp)
-            s += "\n{}".format("-" * (len(self.last_exp) + 3))
+            s += "\n{}".format(
+                "-"
+                * (
+                    len(self.intermediate_expr[0])
+                    + 3
+                    + len(str(max(self.results)))
+                )
+            )
             for i in range(self.transformer.repeats):
                 s += "\n{} = {}".format(
                     self.intermediate_expr[i], self.results[i]
                 )
-            # s += str(self.results[0])
         else:
             s += "{} = ".format(self.last_exp)
             s += "{} = {}".format(self.intermediate_expr[0], self.results[0])

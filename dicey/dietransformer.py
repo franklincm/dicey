@@ -92,10 +92,12 @@ class DieTransformer(lark.Transformer):
 
         n = int(args[0])
         m = int(args[1])
+        tmp_str = ""
         total = 0
         for die in range(n):
             roll = random.randrange(1, m + 1)
             total += roll
+            tmp_str += "({})".format(roll)
 
             if roll > self.max:
                 self.max = roll
@@ -103,7 +105,8 @@ class DieTransformer(lark.Transformer):
             if roll < self.min:
                 self.min = roll
 
-        self.intermediate_expr += "{}".format(total)
+        tmp_str = ") + (".join(tmp_str.split(")("))
+        self.intermediate_expr += "{}".format(tmp_str)
         self.value.put(total)
 
     def meta(self, args):
