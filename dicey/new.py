@@ -51,6 +51,7 @@ class TreeParser(lark.Transformer):
         self.operators = LifoQueue()
         self.max = -(sys.maxsize)
         self.min = sys.maxsize
+        self.repeats = 0
 
     def _precedence(self, op):
         if op == "+" or op == "-":
@@ -75,8 +76,6 @@ class TreeParser(lark.Transformer):
             b = self.value.get()
             a = self.value.get()
             self.value.put(self._applyOp(a, b, op))
-
-        print(self.string)
 
     def lparen(self, args):
         self.string += "("
@@ -161,18 +160,28 @@ class TreeParser(lark.Transformer):
         self.string += "{}".format(args[1])
 
     def repeat(self, args):
-        print("repeat: {}".format(args[0]))
+        self.repeats = args[0]
 
 
 t = TreeParser()
-parser = lark.Lark(grammar, parser="lalr", transformer=t, postlex=t._eval())
+parser = lark.Lark(
+    grammar, parser="lalr", transformer=t, propagate_positions=False
+)
 tree = parser.parse(text)
-# t._eval()
+t._eval()
 
 
-# print(t.string)
+print(t.string)
 print(t.intermediate_expr)
 print(t.value.get())
 
 print("min: {}".format(t.min))
 print("max: {}".format(t.max))
+print("repeat: {}".format(t.repeats))
+
+tmp = t.string
+t.__init__()
+parser.parse(tmp)
+t._eval()
+print(t.intermediate_expr)
+print(t.value.get())
