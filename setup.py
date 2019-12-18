@@ -5,13 +5,14 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="dicey",
-    version="2.0.0",
+    version="2.0.1",
     author="Chase Franklin",
     author_email="gnullbyte@gmail.com",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/gnullbyte/dicey",
     packages=setuptools.find_packages(exclude=["contrib", "docs", "tests*"]),
+    include_package_data=True,
     install_requires=["lark-parser", "docopt"],
     entry_points={"console_scripts": ["dicey=dicey.__main__:main"]},
     classifiers=[
