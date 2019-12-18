@@ -1,20 +1,17 @@
 # Dicey
-version 1.0.3
+version 2.0.0
 
 A python package for evaluating dice rolls.
 
 ## Description
 Dicey parses strings of dice rolls of the form:
 ```
-'1d20 + 2 + 2d4 - 1d8 + 1'
+'1d20 + 2 + 2d4 - 1d8 + 1 - min {3}'
 ```
-Dicey then rolls the specified dice, and computes the total.
 
-Results can be displayed a few different ways:
-
-- just the total, e.g. '20'
-- the original expression and the total, e.g. '1d20 + 2 = 17'
-- the original expression, the intermediate dice rolls, and the total, e.g. '1d20 + 2 = (15) + 2 = 17'
+Where `min` (or `max`) holds the value of the highest or lowest single die rolled and `{3}` is how many times to repeat the expression. `[min|max]` and `{num}` are optional.
+Dicey then rolls the specified dice, and computes the total. Valid arithmentic operators are `+ - * / ()`. Dicey will always translate individual die expressions to a randomized result
+before applying arithmetic operators.
 
 ## Installation
 pip install dicey
@@ -24,29 +21,21 @@ pip install dicey
 ```
 Usage:
   dicey
-  dicey [-v | -vv] <expression>
+  dicey <expression>
 
 Options:
   -h --help  show this screen.
-  -v         print expression with total
-  -vv        print expression, intermediate results, and total
 ```
 
 ### As a python package
 ```python
-from dicey import roller
+from dicey.dieparser import DieParser
 
-d = roller.DieRoller()
-d.roll('1d20 + 1d4 + 2')
+d = DieParser()
+d.parse('1d20 + 1d4 + 2')
+result = d.__str__()
+print(result)
 
-result = d.result
-str(result)        # >>> "13"
-str(result.v())    # >>> "1d20 + 1d4 + 2 = 13"
-print(result.vv()) # >>> "1d20 + 1d4 + 2 = (7) + (4) + 2 = 13
-
-d.reroll()
-result = d.result
-print(result)      # >>> "23"
-print(result.v())  # >>> "1d20 + 1d4 + 2 = 23"
-print(result.vv()) # >>> "1d20 + 1d4 + 2 = (19) + (2) = 23"
+# or of course simply:
+print(d)
 ```
