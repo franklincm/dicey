@@ -1,34 +1,25 @@
 """
 Usage:
   dicey
-  dicey [-v | -vv] <expression>
+  dicey <expression>
 
 Options:
   -h --help  show this screen.
-  -v         print expression with total
-  -vv        print expression, intermediate results, and total
-
 """
 
-from lark import exceptions
-
-try:
-    from . import roller
-except ImportError:
-    import roller
 import sys
+from lark import exceptions
+from dicey.dieparser import DieParser
 
 
 def loop():
-    d = roller.DieRoller()
+    d = DieParser()
 
     while True:
         try:
             expr = input("roll: ")
-            d.roll(expr)
-            print(d.result)
-            print(d.result.v())
-            print(d.result.vv())
+            d.parse(expr)
+            print(d)
         except exceptions.UnexpectedCharacters:
             print("invalid expression")
         except exceptions.UnexpectedToken:
@@ -48,16 +39,9 @@ def main():
     arguments = docopt(__doc__)
 
     if arguments["<expression>"]:
-        d = roller.DieRoller()
-        d.roll(arguments["<expression>"])
-
-        if arguments["-v"]:
-            if arguments["-v"] == 1:
-                print(d.result.v())
-            elif arguments["-v"] == 2:
-                print(d.result.vv())
-        else:
-            print(d.result)
+        d = DieParser()
+        d.parse(arguments["<expression>"])
+        print(d)
 
     else:
         loop()
