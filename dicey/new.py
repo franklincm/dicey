@@ -37,13 +37,15 @@ SPEC: "min"|"max"
 %ignore WS
 """
 
-# text = "(1 + (2d4 + (1 + (3d6 + (12d8))))) + (2d4 + 1d6) + (1d8) - 2d4 - min"
-text = "1 + (2d4 + 3d6) * 2 - min {2}"
+text = (
+    "(1 + (2d4 + (1 + (3d6 + (12d8))))) + (2d4 + 1d6) + (1d8) - 2d4 - min {2}"
+)
+# text = "1 + (2d4 + 3d6) * 2 - min {2}"
 # text = "4d6 - min"
 # print(tree.pretty())
 
 
-class TreeParser(lark.Transformer):
+class DieTransformer(lark.Transformer):
     def __init__(self):
         self.string = ""
         self.intermediate_expr = ""
@@ -160,28 +162,46 @@ class TreeParser(lark.Transformer):
         self.string += "{}".format(args[1])
 
     def repeat(self, args):
-        self.repeats = args[0]
+        self.repeats = int(args[0])
+        self.string += " {{{0}}}".format(self.repeats)
 
 
-t = TreeParser()
-parser = lark.Lark(
-    grammar, parser="lalr", transformer=t, propagate_positions=False
-)
-tree = parser.parse(text)
-t._eval()
+class DieParser:
+    def __init__(self):
+        self.last_exp = ""
+        self.intermediate_expr = ""
+        self.results = []
+        self.transformer = DieTransformer()
+        self.parser = lark.Lark(
+            grammar,
+            parser="lalr",
+            transformer=self.transformer,
+            propagate_positions=False,
+        )
+
+    def parse(self, text):
+        self.parser.parse(text)
+        self.transformer._eval()
+        self.last_exp = self.transformer.string
+        self.intermediate_expr = self.transformer.intermediate_expr
+        self.results.append(self.transformer.value.get())
+
+        for i in range(self.transformer.repeats - 1):
+            self.transformer.__init__()
+            self.parser.parse(text)
+            self.intermediate_expr += "\n{}".format(
+                self.transformer.intermediate_expr
+            )
+            self.results.append(self.transformer.value.get())
+
+    def __str__(self):
+        s = ""
+        s += "{} = ".format(self.last_exp)
+        s += "{} = ".format(self.intermediate_expr)
+        s += str(self.results[0])
+        return s
 
 
-print(t.string)
-print(t.intermediate_expr)
-print(t.value.get())
-
-print("min: {}".format(t.min))
-print("max: {}".format(t.max))
-print("repeat: {}".format(t.repeats))
-
-tmp = t.string
-t.__init__()
-parser.parse(tmp)
-t._eval()
-print(t.intermediate_expr)
-print(t.value.get())
+d = DieParser()
+d.parse(text)
+print(d)
