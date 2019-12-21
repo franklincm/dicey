@@ -21,6 +21,7 @@ def test_exprs():
         "2d4 + 8",
         "1d6",
         "4d6 - min {6}",
+        "4d6 + max {6}",
         "(((1d4)))",
         "2d4 * (1 + 3)",
         "(1d6)",
@@ -31,3 +32,4 @@ def test_exprs():
     d = DieParser()
     for expr in exprs:
         d.parse(expr)
+        print(d)

@@ -38,14 +38,13 @@ class DieTransformer(lark.Transformer):
             op = self.operators.get()
             b = self.value.get()
             a = self.value.get()
-            print(f"apply op: {a} {b} {op}")
+
             self.value.put(self._applyOp(a, b, op))
 
     def lparen(self, args):
         self.string += "("
         self.intermediate_expr += "("
 
-        print(f"operators.put: {args[0]}")
         self.operators.put(args[0])
 
     def rparen(self, args):
@@ -57,7 +56,6 @@ class DieTransformer(lark.Transformer):
             b = self.value.get()
             a = self.value.get()
 
-            print(f"apply op: {a} {b} {op}")
             self.value.put(self._applyOp(a, b, op))
 
             op = self.operators.get()
@@ -65,7 +63,7 @@ class DieTransformer(lark.Transformer):
     def num(self, args):
         self.string += "{}".format(args[0])
         self.intermediate_expr += args[0]
-        print(f"num val: {args[0]}")
+
         self.value.put(int(args[0]))
 
     def op(self, args):
@@ -74,8 +72,7 @@ class DieTransformer(lark.Transformer):
 
         if not self.operators.empty():
             test_op = self.operators.queue[-1]
-            print(f"test_op == {test_op}")
-            print(f"args[0] == {args[0]}")
+
             while not self.operators.empty() and self._precedence(
                 test_op
             ) >= self._precedence(args[0]):
@@ -84,10 +81,7 @@ class DieTransformer(lark.Transformer):
                 b = self.value.get()
                 a = self.value.get()
 
-                print(f"op apply op: {a} {b} {op}")
                 self.value.put(self._applyOp(a, b, op))
-
-        print(f"operators.put: {args[0]}")
 
         self.operators.put(args[0])
 
@@ -96,7 +90,7 @@ class DieTransformer(lark.Transformer):
 
         n = int(args[0])
         m = int(args[1])
-        tmp_str = ""
+        tmp_str = "["
         total = 0
         for die in range(n):
             roll = random.randrange(1, m + 1)
@@ -108,8 +102,11 @@ class DieTransformer(lark.Transformer):
 
             if roll < self.min:
                 self.min = roll
-        print(f"die total: {total}")
-        tmp_str = ") + (".join(tmp_str.split(")("))
+
+        tmp_str = " + ".join(tmp_str.split(")("))
+        tmp_str = "".join(tmp_str.split("("))
+        tmp_str = "".join(tmp_str.split(")"))
+        tmp_str += "]"
         self.intermediate_expr += "{}".format(tmp_str)
         self.value.put(total)
 
@@ -120,11 +117,11 @@ class DieTransformer(lark.Transformer):
         if t == "min":
             self.op([op])
             self.value.put(self.min)
-            self.intermediate_expr += "[{}]".format(self.min)
+            self.intermediate_expr += "{{{0}}}".format(self.min)
         elif t == "max":
             self.op([op])
             self.value.put(self.max)
-            self.intermediate_expr += "[{}]".format(self.max)
+            self.intermediate_expr += "{{{0}}}".format(self.max)
 
         self.string += "{}".format(args[1])
 
