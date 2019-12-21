@@ -23,6 +23,7 @@ class DieTransformer(lark.Transformer):
         return 0
 
     def _applyOp(self, a, b, op):
+
         if op == "+":
             return a + b
         if op == "-":
@@ -37,12 +38,14 @@ class DieTransformer(lark.Transformer):
             op = self.operators.get()
             b = self.value.get()
             a = self.value.get()
+            print(f"apply op: {a} {b} {op}")
             self.value.put(self._applyOp(a, b, op))
 
     def lparen(self, args):
         self.string += "("
         self.intermediate_expr += "("
 
+        print(f"operators.put: {args[0]}")
         self.operators.put(args[0])
 
     def rparen(self, args):
@@ -54,21 +57,15 @@ class DieTransformer(lark.Transformer):
             b = self.value.get()
             a = self.value.get()
 
-            if op == "+":
-                self.value.put(a + b)
-            elif op == "-":
-                self.value.put(a - b)
-            elif op == "*":
-                self.value.put(a * b)
-            elif op == "/":
-                self.value.put(a / b)
+            print(f"apply op: {a} {b} {op}")
+            self.value.put(self._applyOp(a, b, op))
 
             op = self.operators.get()
 
     def num(self, args):
         self.string += "{}".format(args[0])
         self.intermediate_expr += args[0]
-
+        print(f"num val: {args[0]}")
         self.value.put(int(args[0]))
 
     def op(self, args):
@@ -76,14 +73,21 @@ class DieTransformer(lark.Transformer):
         self.intermediate_expr += " {} ".format(args[0])
 
         if not self.operators.empty():
-            op = self.operators.queue[-1]
+            test_op = self.operators.queue[-1]
+            print(f"test_op == {test_op}")
+            print(f"args[0] == {args[0]}")
             while not self.operators.empty() and self._precedence(
-                op
+                test_op
             ) >= self._precedence(args[0]):
                 op = self.operators.get()
+                test_op = self.operators.queue[-1]
                 b = self.value.get()
                 a = self.value.get()
+
+                print(f"op apply op: {a} {b} {op}")
                 self.value.put(self._applyOp(a, b, op))
+
+        print(f"operators.put: {args[0]}")
 
         self.operators.put(args[0])
 
@@ -104,7 +108,7 @@ class DieTransformer(lark.Transformer):
 
             if roll < self.min:
                 self.min = roll
-
+        print(f"die total: {total}")
         tmp_str = ") + (".join(tmp_str.split(")("))
         self.intermediate_expr += "{}".format(tmp_str)
         self.value.put(total)
