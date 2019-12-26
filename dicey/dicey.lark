@@ -1,6 +1,7 @@
 start: expr+ (op expr)* meta* repeat?
 
 expr: tok
+     |l expr (op expr)* r
      |l tok r
      |l tok expr_tail r
 

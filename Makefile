@@ -4,7 +4,7 @@ install-dev: Pipfile
 	pipenv install --dev
 
 test: tests/
-	python -m pytest
+	python -m pytest -s
 
 build: setup.py
 	python setup.py sdist bdist_wheel
