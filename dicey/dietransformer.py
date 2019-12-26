@@ -69,10 +69,8 @@ class DieTransformer(lark.Transformer):
     def op(self, args):
         self.string += " {} ".format(args[0])
         self.intermediate_expr += " {} ".format(args[0])
-        print(f"args[0] = {args[0]}")
         if not self.operators.empty():
             test_op = self.operators.queue[-1]
-            print(f"test_op = {test_op}")
 
             while not self.operators.empty() and self._precedence(
                 test_op
