@@ -39,59 +39,60 @@ class DieParser:
             self.parse_relop()
 
     def parse_relop(self):
-        if self.transformer.relval:
-            val = self.transformer.relval
+        if len(self.transformer.relops) > 0:
+            for i in range(len(self.transformer.relops)):
+                val = self.transformer.relvals[i]
 
-            if self.transformer.relop == "<":
-                self.hits.append(
-                    len(
-                        [
-                            x
-                            for x in self.transformer.intermediate_vals
-                            if x < val
-                        ]
+                if self.transformer.relops[i] == "<":
+                    self.hits.append(
+                        len(
+                            [
+                                x
+                                for x in self.transformer.intermediate_vals
+                                if x < val
+                            ]
+                        )
                     )
-                )
 
-            if self.transformer.relop == ">":
-                self.hits.append(
-                    len(
-                        [
-                            x
-                            for x in self.transformer.intermediate_vals
-                            if x > val
-                        ]
+                if self.transformer.relops[i] == ">":
+                    self.hits.append(
+                        len(
+                            [
+                                x
+                                for x in self.transformer.intermediate_vals
+                                if x > val
+                            ]
+                        )
                     )
-                )
 
-            if self.transformer.relop == ">=":
-                self.hits.append(
-                    len(
-                        [
-                            x
-                            for x in self.transformer.intermediate_vals
-                            if x >= val
-                        ]
+                if self.transformer.relops[i] == ">=":
+                    self.hits.append(
+                        len(
+                            [
+                                x
+                                for x in self.transformer.intermediate_vals
+                                if x >= val
+                            ]
+                        )
                     )
-                )
 
-            if self.transformer.relop == "<=":
-                self.hits.append(
-                    len(
-                        [
-                            x
-                            for x in self.transformer.intermediate_vals
-                            if x <= val
-                        ]
+                if self.transformer.relops[i] == "<=":
+                    self.hits.append(
+                        len(
+                            [
+                                x
+                                for x in self.transformer.intermediate_vals
+                                if x <= val
+                            ]
+                        )
                     )
-                )
 
     def __str__(self):
         s = ""
         if len(self.results) > 1:
             s += "{} = ".format(self.last_exp)
 
-            if self.transformer.relval:
+            if len(self.transformer.relvals) > 0:
                 s += "\n{}".format(
                     "-"
                     * (
@@ -101,9 +102,11 @@ class DieParser:
                     )
                 )
                 for i in range(self.transformer.repeats):
-                    s += "\n{}:  {} hits".format(
-                        self.intermediate_expr[i], self.hits[i]
-                    )
+                    s += "\n{}: ".format(self.intermediate_expr[i])
+
+                    for stat in self.hits:
+                        s += "{} ".format(stat)
+
             else:
                 s += "\n{}".format(
                     "-"
@@ -118,9 +121,19 @@ class DieParser:
                         self.intermediate_expr[i], self.results[i]
                     )
         else:
-            if self.transformer.relval:
-                s = "{} = {}".format(self.last_exp, self.intermediate_expr[0])
-                s += ": {} hits".format(self.hits[0])
+            if len(self.transformer.relvals) > 0:
+                s = "{} = {}: ".format(
+                    self.last_exp, self.intermediate_expr[0]
+                )
+
+                for index, val in enumerate(self.hits):
+                    s += "{}".format(val)
+
+                    # add commas, except after the last value
+                    if len(self.hits) > 1 and index < (len(self.hits) - 1):
+                        s += ", "
+
+                # s += ": {} hits".format(self.hits[0])
                 return s
 
             s += "{} = ".format(self.last_exp)

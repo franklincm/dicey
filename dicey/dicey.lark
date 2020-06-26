@@ -1,4 +1,4 @@
-start: expr+ (op expr)* meta* relexp? repeat?
+start: expr+ (op expr)* meta* repeat?|expr relexp ("," relexp)~0..3 repeat?
 
 expr: tok
      |l expr (op expr)* r
@@ -27,7 +27,7 @@ LPAREN: "("
 RPAREN: ")"
 ADDOP: "+"|"-"
 MULOP: "*"|"/"
-RELOP: "<="|">="|"<"|">"
+RELOP: "<="|">="|"<"|">"|"="
 SPEC: "min"|"max"
 
 %import common.INT

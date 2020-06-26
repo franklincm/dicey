@@ -15,8 +15,8 @@ class DieTransformer(lark.Transformer):
         self.max = -(sys.maxsize)
         self.min = sys.maxsize
         self.repeats = 0
-        self.relop = None
-        self.relval = None
+        self.relops = []
+        self.relvals = []
 
     def _precedence(self, op):
         if op == "+" or op == "-":
@@ -136,5 +136,5 @@ class DieTransformer(lark.Transformer):
         self.string += " {{{0}}}".format(self.repeats)
 
     def relexp(self, args):
-        self.relop = args[0]
-        self.relval = int(args[1])
+        self.relops.append(args[0])
+        self.relvals.append(int(args[1]))
