@@ -1,4 +1,4 @@
-start: expr+ (op expr)* meta* repeat?|expr relexp ("," relexp)~0..3 repeat?
+start: expr+ (op expr)* meta* repeat?|die relexp ("," relexp)~0..3 repeat?
 
 expr: tok
      |l expr (op expr)* r
