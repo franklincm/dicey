@@ -9,11 +9,14 @@ class DieTransformer(lark.Transformer):
     def __init__(self):
         self.string = ""
         self.intermediate_expr = ""
+        self.intermediate_vals = []
         self.value = LifoQueue()
         self.operators = LifoQueue()
         self.max = -(sys.maxsize)
         self.min = sys.maxsize
         self.repeats = 0
+        self.relops = []
+        self.relvals = []
 
     def _precedence(self, op):
         if op == "+" or op == "-":
@@ -38,7 +41,6 @@ class DieTransformer(lark.Transformer):
             op = self.operators.get()
             b = self.value.get()
             a = self.value.get()
-
             self.value.put(self._applyOp(a, b, op))
 
     def lparen(self, args):
@@ -69,7 +71,6 @@ class DieTransformer(lark.Transformer):
     def op(self, args):
         self.string += " {} ".format(args[0])
         self.intermediate_expr += " {} ".format(args[0])
-
         if not self.operators.empty():
             test_op = self.operators.queue[-1]
 
@@ -77,7 +78,10 @@ class DieTransformer(lark.Transformer):
                 test_op
             ) >= self._precedence(args[0]):
                 op = self.operators.get()
-                test_op = self.operators.queue[-1]
+
+                if not self.operators.empty():
+                    test_op = self.operators.queue[-1]
+
                 b = self.value.get()
                 a = self.value.get()
 
@@ -96,6 +100,8 @@ class DieTransformer(lark.Transformer):
             roll = random.randrange(1, m + 1)
             total += roll
             tmp_str += "({})".format(roll)
+
+            self.intermediate_vals.append(roll)
 
             if roll > self.max:
                 self.max = roll
@@ -128,3 +134,7 @@ class DieTransformer(lark.Transformer):
     def repeat(self, args):
         self.repeats = int(args[0])
         self.string += " {{{0}}}".format(self.repeats)
+
+    def relexp(self, args):
+        self.relops.append(args[0])
+        self.relvals.append(int(args[1]))

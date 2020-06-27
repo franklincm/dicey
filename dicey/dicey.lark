@@ -1,4 +1,4 @@
-start: expr+ (op expr)* meta* repeat?
+start: expr+ (op expr)* meta* repeat?|expr relexp ("," relexp)~0..3 repeat?
 
 expr: tok
      |l expr (op expr)* r
@@ -9,6 +9,8 @@ expr_tail: op tok
           |op tok expr_tail
           |op l tok r
           |op l tok expr_tail r
+
+relexp: RELOP INT
 
 tok: die|num
 die: INT "d" INT         -> die
@@ -25,6 +27,7 @@ LPAREN: "("
 RPAREN: ")"
 ADDOP: "+"|"-"
 MULOP: "*"|"/"
+RELOP: "<="|">="|"<"|">"|"="
 SPEC: "min"|"max"
 
 %import common.INT
