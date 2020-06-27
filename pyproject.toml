@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dicey"
-version = "2.0.2"
+version = "2.0.3"
 description = "python package for evaluating dice rolls"
 authors = ["Chase Franklin <gnullbyte@gmail.com>"]
 license = "MIT"
@@ -16,6 +16,7 @@ flake8 = "^3.8.3"
 pytest = "^5.4.3"
 twine = "^3.2.0"
 pre-commit = "^2.5.1"
+wheel = "^0.34.2"
 
 [tool.black]
 line-length = 79
