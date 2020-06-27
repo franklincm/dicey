@@ -1,7 +1,7 @@
-install-dev: Pipfile
+install-dev: pyproject.toml
+	poetry install
 	pre-commit install
 	git config --bool flake8.strict true
-	pipenv install --dev
 
 test: tests/
 	python -m pytest -s
@@ -13,6 +13,6 @@ publish: build
 	python -m twine upload dist/*
 
 clean:
-	rm -rf build/
-	rm -rf dist/
-	rm -rf dicey.egg-info/
+	$(RM) -r build/
+	$(RM) -r dist/
+	$(RM) -r dicey.egg-info/

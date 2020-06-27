@@ -39,7 +39,7 @@ class DieParser:
             self.parse_relop()
 
     def parse_relop(self):
-        if len(self.transformer.relops) > 0:
+        if self.transformer.has_relexp:
             for i in range(len(self.transformer.relops)):
                 val = self.transformer.relvals[i]
 
@@ -98,59 +98,98 @@ class DieParser:
                         )
                     )
 
-    def __str__(self):
+    def _ellipsis_expr(self, s, n):
+        """
+        str: s, string to insert ellipsis into
+        int: n, max length of resulting string
+        """
+
+        c = s
+        while len(c) > n:
+            c = "{}{}".format(c[:-7], " ... ]")
+            # c = c[:-1]
+            while c[-1].isdigit():
+                c = c[:-1]
+
+        return c
+
+    def _print_relexp(self):
+        # relational operators present
+        num_relops = len(self.transformer.relops)
+
+        # total output width, this should be passable from
+        # somewhere later
+        width = 80
+
+        # calc field width for intermediate expression
+        expr_width = (
+            min(80 - 7 - (num_relops * 6), len(self.intermediate_expr[0])) + 2
+        )
+
+        # print headers
+        s = ("{:<7}{:<%d}" % expr_width).format("Pool", "Roll")
+
+        # print specified conditions
+        for relexp in self.transformer.relexps:
+            s += "{:^6}".format(relexp)
+        s += "\n"
+
+        # print rule
+        for i in range(expr_width + 7 + (num_relops * 6)):
+            s += "-"
+        s += "\n"
+
+        # if multiline output
+        if len(self.results) > 1:
+
+            for i in range(self.transformer.repeats):
+                s += "{:<7}".format(self.last_exp)
+                s += ("{:<%d}" % expr_width).format(
+                    self._ellipsis_expr(self.intermediate_expr[i], expr_width)
+                )
+
+                for k in range(num_relops):
+                    s += "{:^6}".format(
+                        ("[%s]") % self.hits[num_relops * i + k]
+                    )
+                s += "\n"
+
+        # single line output (not including headers)
+        else:
+            s += ("{:<7}{:<%d}" % expr_width).format(
+                self.last_exp,
+                self._ellipsis_expr(self.intermediate_expr[0], expr_width,),
+            )
+
+            for index, val in enumerate(self.hits):
+                s += "{:^6}".format(("[%s]" % (val)))
+
+        return s
+
+    def _print_expr(self):
         s = ""
         if len(self.results) > 1:
             s += "{} = ".format(self.last_exp)
-
-            if len(self.transformer.relvals) > 0:
-                s += "\n{}".format(
-                    "-"
-                    * (
-                        len(self.intermediate_expr[0])
-                        + 8
-                        + len(str(max(self.hits)))
-                    )
+            s += "\n{}".format(
+                "-"
+                * (
+                    len(self.intermediate_expr[0])
+                    + 3
+                    + len(str(max(self.results)))
                 )
-                for i in range(self.transformer.repeats):
-                    s += "\n{}: ".format(self.intermediate_expr[i])
-
-                    num_relops = len(self.transformer.relops)
-                    for k in range(num_relops):
-                        s += "[{}]".format(self.hits[num_relops * i + k])
-                        if num_relops > 1 and k < (num_relops - 1):
-                            s += ", "
-
-            else:
-                s += "\n{}".format(
-                    "-"
-                    * (
-                        len(self.intermediate_expr[0])
-                        + 3
-                        + len(str(max(self.results)))
-                    )
+            )
+            for i in range(self.transformer.repeats):
+                s += "\n{} = {}".format(
+                    self.intermediate_expr[i], self.results[i]
                 )
-                for i in range(self.transformer.repeats):
-                    s += "\n{} = {}".format(
-                        self.intermediate_expr[i], self.results[i]
-                    )
         else:
-            if len(self.transformer.relvals) > 0:
-                s = "{} = {}: ".format(
-                    self.last_exp, self.intermediate_expr[0]
-                )
-
-                for index, val in enumerate(self.hits):
-                    s += "{}".format(val)
-
-                    # add commas, except after the last value
-                    if len(self.hits) > 1 and index < (len(self.hits) - 1):
-                        s += ", "
-
-                # s += ": {} hits".format(self.hits[0])
-                return s
 
             s += "{} = ".format(self.last_exp)
             s += "{} = {}".format(self.intermediate_expr[0], self.results[0])
 
         return s
+
+    def __str__(self):
+        if self.transformer.has_relexp:
+            return self._print_relexp()
+        return self._print_expr()

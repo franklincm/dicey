@@ -15,6 +15,8 @@ class DieTransformer(lark.Transformer):
         self.max = -(sys.maxsize)
         self.min = sys.maxsize
         self.repeats = 0
+        self.has_relexp = False
+        self.relexps = []
         self.relops = []
         self.relvals = []
 
@@ -113,6 +115,7 @@ class DieTransformer(lark.Transformer):
         tmp_str = "".join(tmp_str.split("("))
         tmp_str = "".join(tmp_str.split(")"))
         tmp_str += "]"
+
         self.intermediate_expr += "{}".format(tmp_str)
         self.value.put(total)
 
@@ -133,8 +136,16 @@ class DieTransformer(lark.Transformer):
 
     def repeat(self, args):
         self.repeats = int(args[0])
-        self.string += " {{{0}}}".format(self.repeats)
+        # self.string += " {{{0}}}".format(self.repeats)
 
     def relexp(self, args):
-        self.relops.append(args[0])
-        self.relvals.append(int(args[1]))
+        relop = args[0]
+        relval = int(args[1])
+
+        self.relops.append(relop)
+        self.relvals.append(relval)
+
+        self.relexps.append("{} {}".format(relop, relval))
+        self.has_relexp = True
+
+        self.intermediate_expr = self.intermediate_expr.replace(" + ", ", ")
