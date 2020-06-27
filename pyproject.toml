@@ -1,3 +1,23 @@
+[tool.poetry]
+name = "dicey"
+version = "2.0.4"
+description = "python package for evaluating dice rolls"
+authors = ["Chase Franklin <gnullbyte@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+lark-parser = "^0.8.9"
+docopt = "^0.6.2"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+flake8 = "^3.8.3"
+pytest = "^5.4.3"
+twine = "^3.2.0"
+pre-commit = "^2.5.1"
+wheel = "^0.34.2"
+
 [tool.black]
 line-length = 79
 include = '\.pyi?$'
@@ -15,3 +35,7 @@ exclude = '''
 
 )/
 '''
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
+
