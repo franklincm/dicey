@@ -87,6 +87,17 @@ class DieParser:
                         )
                     )
 
+                if self.transformer.relops[i] == "=":
+                    self.hits.append(
+                        len(
+                            [
+                                x
+                                for x in self.transformer.intermediate_vals
+                                if x == val
+                            ]
+                        )
+                    )
+
     def __str__(self):
         s = ""
         if len(self.results) > 1:
@@ -104,8 +115,11 @@ class DieParser:
                 for i in range(self.transformer.repeats):
                     s += "\n{}: ".format(self.intermediate_expr[i])
 
-                    for stat in self.hits:
-                        s += "{} ".format(stat)
+                    num_relops = len(self.transformer.relops)
+                    for k in range(num_relops):
+                        s += "[{}]".format(self.hits[num_relops * i + k])
+                        if num_relops > 1 and k < (num_relops - 1):
+                            s += ", "
 
             else:
                 s += "\n{}".format(
