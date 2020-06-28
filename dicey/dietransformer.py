@@ -106,7 +106,7 @@ class DieTransformer(lark.Transformer):
         tmp_str = "["
         total = 0
         for die in range(n):
-            roll = random.randrange(1, m + 1)
+            roll = random.SystemRandom().randint(1, m + 1)
             total += roll
             tmp_str += "({})".format(roll)
 
