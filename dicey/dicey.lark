@@ -1,4 +1,4 @@
-start: expr+ (op expr)* meta* repeat?|die relexp ("," relexp)~0..3 repeat?
+start: expr+ (op expr)* meta* repeat?|die relexp ("," relexp)~0..3 (repeat| diminish)?
 
 expr: tok
      |l expr (op expr)* r
@@ -21,7 +21,7 @@ r: RPAREN                -> rparen
 
 meta: ADDOP SPEC         -> meta
 repeat: "{" INT "}"      -> repeat
-
+diminish: "!"            -> diminish
 
 LPAREN: "("
 RPAREN: ")"
