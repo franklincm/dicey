@@ -30,6 +30,23 @@ class DieParser:
         self.results.append(self.transformer.value.get())
         self.parse_relop()
 
+        if self.transformer.diminishing:
+            self.diminish_start = self.transformer.diminish_start
+            self.diminish_sides = self.transformer.diminish_sides
+            for i in range(self.diminish_start - 1, 0, -1):
+                text = text.replace(
+                    ("%dd%d" % (i + 1, self.diminish_sides)),
+                    ("%dd%d" % (i, self.diminish_sides)),
+                )
+                self.transformer.__init__()
+                self.parser.parse(text)
+                self.transformer._eval()
+                self.intermediate_expr.append(
+                    self.transformer.intermediate_expr
+                )
+                self.results.append(self.transformer.value.get())
+                self.parse_relop()
+
         for i in range(self.transformer.repeats - 1):
             self.transformer.__init__()
             self.parser.parse(text)
@@ -123,7 +140,8 @@ class DieParser:
 
         # calc field width for intermediate expression
         expr_width = (
-            min(80 - 7 - (num_relops * 6), len(self.intermediate_expr[0])) + 2
+            min(width - 7 - (num_relops * 6), len(self.intermediate_expr[0]))
+            + 2
         )
 
         # print headers
@@ -142,8 +160,14 @@ class DieParser:
         # if multiline output
         if len(self.results) > 1:
 
-            for i in range(self.transformer.repeats):
-                s += "{:<7}".format(self.last_exp)
+            for i in range(len(self.intermediate_expr)):
+                if self.transformer.diminishing:
+                    s += "{:<7}".format(
+                        "%dd%d"
+                        % (self.diminish_start - i, self.diminish_sides)
+                    )
+                else:
+                    s += "{:<7}".format(self.last_exp)
                 s += ("{:<%d}" % expr_width).format(
                     self._ellipsis_expr(self.intermediate_expr[i], expr_width)
                 )
@@ -158,7 +182,7 @@ class DieParser:
         else:
             s += ("{:<7}{:<%d}" % expr_width).format(
                 self.last_exp,
-                self._ellipsis_expr(self.intermediate_expr[0], expr_width,),
+                self._ellipsis_expr(self.intermediate_expr[0], expr_width),
             )
 
             for index, val in enumerate(self.hits):

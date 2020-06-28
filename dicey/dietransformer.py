@@ -15,6 +15,9 @@ class DieTransformer(lark.Transformer):
         self.max = -(sys.maxsize)
         self.min = sys.maxsize
         self.repeats = 0
+        self.diminishing = False
+        self.diminish_start = 0
+        self.diminish_sides = 0
         self.has_relexp = False
         self.relexps = []
         self.relops = []
@@ -96,6 +99,10 @@ class DieTransformer(lark.Transformer):
 
         n = int(args[0])
         m = int(args[1])
+
+        self.diminish_start = n
+        self.diminish_sides = m
+
         tmp_str = "["
         total = 0
         for die in range(n):
@@ -136,7 +143,9 @@ class DieTransformer(lark.Transformer):
 
     def repeat(self, args):
         self.repeats = int(args[0])
-        # self.string += " {{{0}}}".format(self.repeats)
+
+    def diminish(self, args):
+        self.diminishing = True
 
     def relexp(self, args):
         relop = args[0]
