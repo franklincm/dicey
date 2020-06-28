@@ -13,7 +13,10 @@ class DieParser:
         self.intermediate_expr = []
         self.results = []
         self.hits = []
+        self.totals = {}
         self.transformer = DieTransformer()
+        self.diminish_start = None
+        self.diminish_sides = None
         self.parser = lark.Lark(
             self.grammar,
             parser="lalr",
@@ -58,62 +61,65 @@ class DieParser:
     def parse_relop(self):
         if self.transformer.has_relexp:
             for i in range(len(self.transformer.relops)):
+                relexp = self.transformer.relexps[i]
+                if relexp not in self.totals.keys():
+                    self.totals[relexp] = 0
                 val = self.transformer.relvals[i]
 
                 if self.transformer.relops[i] == "<":
-                    self.hits.append(
-                        len(
-                            [
-                                x
-                                for x in self.transformer.intermediate_vals
-                                if x < val
-                            ]
-                        )
+                    hits = len(
+                        [
+                            x
+                            for x in self.transformer.intermediate_vals
+                            if x < val
+                        ]
                     )
+                    self.hits.append(hits)
+                    self.totals[relexp] += hits
 
                 if self.transformer.relops[i] == ">":
-                    self.hits.append(
-                        len(
-                            [
-                                x
-                                for x in self.transformer.intermediate_vals
-                                if x > val
-                            ]
-                        )
+                    hits = len(
+                        [
+                            x
+                            for x in self.transformer.intermediate_vals
+                            if x > val
+                        ]
                     )
+                    self.hits.append(hits)
+                    self.totals[relexp] += hits
 
                 if self.transformer.relops[i] == ">=":
-                    self.hits.append(
-                        len(
-                            [
-                                x
-                                for x in self.transformer.intermediate_vals
-                                if x >= val
-                            ]
-                        )
+                    hits = len(
+                        [
+                            x
+                            for x in self.transformer.intermediate_vals
+                            if x >= val
+                        ]
                     )
+                    self.hits.append(hits)
+                    self.totals[relexp] += hits
 
                 if self.transformer.relops[i] == "<=":
-                    self.hits.append(
-                        len(
-                            [
-                                x
-                                for x in self.transformer.intermediate_vals
-                                if x <= val
-                            ]
-                        )
+                    hits = len(
+                        [
+                            x
+                            for x in self.transformer.intermediate_vals
+                            if x <= val
+                        ]
                     )
+                    self.hits.append(hits)
+                    self.totals[relexp] += hits
 
                 if self.transformer.relops[i] == "=":
-                    self.hits.append(
-                        len(
-                            [
-                                x
-                                for x in self.transformer.intermediate_vals
-                                if x == val
-                            ]
-                        )
+                    hits = len(
+                        [
+                            x
+                            for x in self.transformer.intermediate_vals
+                            if x == val
+                        ]
                     )
+                    self.hits.append(hits)
+                    self.totals[relexp] += hits
 
     def _ellipsis_expr(self, s, n):
         """
@@ -129,6 +135,25 @@ class DieParser:
                 c = c[:-1]
 
         return c
+
+    def _print_rule(self, width):
+        s = ""
+        for i in range(width):
+            s += "-"
+        s += "\n"
+        return s
+
+    def _print_totals(self, width):
+        for total in list(self.totals.values()):
+            width = width - 6
+
+        s = ("{:<%d}" % (width)).format("Total")
+
+        for total in list(self.totals.values()):
+            s += "{:^6}".format("[%s]" % total)
+            # s += ("[{:<%d}]" % (len(str(total)))).format(total)
+
+        return s
 
     def _print_relexp(self):
         # relational operators present
@@ -147,8 +172,13 @@ class DieParser:
             + 2
         )
 
+        s = ""
+
         # print headers
-        s = ("{:<5}{:<7}{:<%d}" % expr_width).format("Iter", "Pool", "Roll")
+        if self.diminish_start:
+            s += "{:<5}".format("Iter")
+
+        s += ("{:<7}{:<%d}" % expr_width).format("Pool", "Roll")
 
         # print specified conditions
         for relexp in self.transformer.relexps:
@@ -156,9 +186,7 @@ class DieParser:
         s += "\n"
 
         # print rule
-        for i in range(expr_width + 5 + 7 + (num_relops * 6)):
-            s += "-"
-        s += "\n"
+        s += self._print_rule(expr_width + 5 + 7 + (num_relops * 6))
 
         # if multiline output
         if len(self.results) > 1:
@@ -181,6 +209,9 @@ class DieParser:
                         ("[%s]") % self.hits[num_relops * i + k]
                     )
                 s += "\n"
+            if self.transformer.diminishing:
+                s += self._print_rule(expr_width + 5 + 7 + (num_relops * 6))
+                s += self._print_totals(expr_width + 5 + 7 + (num_relops * 6))
 
         # single line output (not including headers)
         else:
