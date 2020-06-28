@@ -140,12 +140,15 @@ class DieParser:
 
         # calc field width for intermediate expression
         expr_width = (
-            min(width - 7 - (num_relops * 6), len(self.intermediate_expr[0]))
+            min(
+                width - 5 - 7 - (num_relops * 6),
+                len(self.intermediate_expr[0]),
+            )
             + 2
         )
 
         # print headers
-        s = ("{:<7}{:<%d}" % expr_width).format("Pool", "Roll")
+        s = ("{:<5}{:<7}{:<%d}" % expr_width).format("Iter", "Pool", "Roll")
 
         # print specified conditions
         for relexp in self.transformer.relexps:
@@ -153,7 +156,7 @@ class DieParser:
         s += "\n"
 
         # print rule
-        for i in range(expr_width + 7 + (num_relops * 6)):
+        for i in range(expr_width + 5 + 7 + (num_relops * 6)):
             s += "-"
         s += "\n"
 
@@ -162,6 +165,7 @@ class DieParser:
 
             for i in range(len(self.intermediate_expr)):
                 if self.transformer.diminishing:
+                    s += "{:<5}".format("%02d" % (i + 1))
                     s += "{:<7}".format(
                         "%dd%d"
                         % (self.diminish_start - i, self.diminish_sides)
