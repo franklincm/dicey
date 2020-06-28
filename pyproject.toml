@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "dicey"
-version = "2.0.6"
+version = "2.0.7"
 description = "python package for evaluating dice rolls"
 authors = ["Chase Franklin <gnullbyte@gmail.com>"]
 license = "MIT"
