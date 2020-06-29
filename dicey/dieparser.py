@@ -186,8 +186,10 @@ class DieParser:
         s += "\n"
 
         # print rule
-        s += self._print_rule(expr_width + 5 + 7 + (num_relops * 6))
-
+        if self.transformer.diminishing:
+            s += self._print_rule(expr_width + 5 + 7 + (num_relops * 6))
+        else:
+            s += self._print_rule(expr_width + 7 + (num_relops * 6))
         # if multiline output
         if len(self.results) > 1:
 
